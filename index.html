@@ -1,296 +1,5 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-  <title>OPEN RADIO</title>
-  
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" href="https://i.imgur.com/wQhe42X.png">
-
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#000000">
-
-  <style>
-    @media (min-width: 768px) {
-      #background-blur {
-        filter: none !important;
-        opacity: 1 !important;
-      }
-    }
-
-    body {
-      margin: 0;
-      font-family: 'Arial', sans-serif;
-      color: white;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      overflow: hidden;
-      background-color: black;
-    }
-
-    #background-blur {
-      filter: blur(30px);
-      opacity: 0.6;
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-      position: fixed;
-      inset: 0;
-      z-index: -1;
-      transition: background-image 0.5s ease-in-out;
-      animation: zoomMove 18s ease-in-out infinite;
-      transform-origin: center;
-    }
-
-    .logo {
-      display: block;
-      width: 200px !important;
-      height: 200px !important;
-      border-radius: 50%;
-      border: 6px solid white;
-      object-fit: cover;
-      margin: 30px auto 20px auto !important;
-      z-index: 1;
-    }
-
-    .title {
-      font-size: 24px;
-      font-weight: bold;
-      margin-bottom: 10px;
-    }
-
-    .live-indicator {
-      background: red !important;
-      color: white !important;
-      font-weight: bold !important;
-      padding: 5px 15px;
-      border-radius: 15px;
-      display: inline-flex;
-      align-items: center;
-      margin-bottom: 15px;
-    }
-
-    .dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      margin-right: 8px;
-      background: white;
-    }
-
-    #song-title {
-      display: block !important;
-      font-size: 22px !important;
-    }
-
-    .song {
-      font-size: 14px;
-      margin-bottom: 20px;
-    }
-
-    .play-btn {
-      width: 90px !important;
-      height: 90px !important;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.2);
-      border: none;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      cursor: pointer;
-      transition: transform 0.1s ease;
-    }
-
-    .play-btn:active {
-      transform: scale(0.95);
-    }
-
-    .play-btn img {
-      width: 42px !important;
-      height: 42px !important;
-    }
-
-    .volume {
-      margin-top: 30px !important;
-      width: 80%;
-      margin: 0 auto 15px;
-    }
-
-    .redes-visibles {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 16px;
-      margin-top: 25px;
-    }
-
-    .redes-visibles a {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.15);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.25);
-      transition: transform 0.2s ease, background-color 0.2s ease;
-    }
-
-    .redes-visibles a:hover {
-      transform: scale(1.12);
-      background: rgba(255, 255, 255, 0.3);
-    }
-
-    .redes-visibles img {
-      width: 26px;
-      height: 26px;
-    }
-
-    @media (max-width: 767px) {
-      .controls {
-        align-items: center !important;
-        justify-content: center !important;
-        flex-direction: column !important;
-      }
-      .play-btn {
-        margin: 0 auto !important;
-      }
-      .logo {
-        animation: spinLogo 10s linear infinite;
-      }
-    }
-
-    input[type=range] {
-      accent-color: white;
-    }
-
-    @media (min-width: 768px) {
-      .controls {
-        position: relative;
-        flex-direction: column;
-        justify-content: center;
-      }
-      .play-btn {
-        position: relative !important;
-        z-index: 1;
-      }
-      .volume {
-        position: absolute !important;
-        z-index: 2 !important;
-        top: 36% !important;
-        left: 58% !important;
-        transform: translate(-50%, -50%) !important;
-        width: 60% !important;
-        height: 6px !important;
-        margin: 0 !important;
-      }
-      #cover-art.spinning, #logo.spinning {
-        animation: spinLogo 10s linear infinite;
-      }
-      #background-overlay {
-        position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.25);
-        z-index: -1;
-      }
-      .player-container {
-        display: flex;
-        gap: 30px;
-        text-align: left;
-        align-items: center;
-        max-width: 1400px;
-        min-width: 600px;
-        margin: 0 auto;
-        background: rgba(0, 0, 0, 0.6);
-        backdrop-filter: blur(35px);
-        box-shadow: 0 0 30px rgba(0,0,0,0.5);
-        border: 1px solid rgba(255,255,255,0.1);
-      }
-      .info {
-        flex: 1;
-      }
-      .redes-visibles {
-        justify-content: flex-start;
-      }
-    }
-
-    @keyframes spinLogo {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    @keyframes zoomMove {
-      0% { transform: scale(1) translateY(0px); }
-      50% { transform: scale(1.08) translateY(10px); }
-      100% { transform: scale(1) translateY(0px); }
-    }
-
-    .player-container {
-      position: relative !important;
-      border-radius: 30px;
-      padding: 0 30px 30px;
-      text-align: center;
-    }
-
-    .barra-decorativa {
-      height: 4px;
-      width: 100%;
-      max-width: 360px;
-      margin: 10px auto 20px;
-      border-radius: 2px;
-      background: linear-gradient(90deg, rgba(255,255,255,0.5), rgba(255,255,255,0.1));
-      transition: background 0.8s ease-in-out;
-    }
-  </style>
-</head>
-<body>
-
-  <div id="background-blur"></div>
-  <div id="background-overlay"></div>
-
-  <!-- Contenedor del Reproductor -->
-  <div class="player-container">
-    <div style="position: relative; width: 220px; height: 220px; margin: 30px auto 20px auto;">
-      <img alt="Carátula" id="cover-art" class="logo" style="display:none; z-index:10; position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 50%; border: 4px solid white;" src="https://i.imgur.com/DHOJTCz.jpeg"/>
-      <img alt="OPEN RADIO Logo" class="logo spinning" id="logo" style="display:block; z-index:10; position: relative;" src="https://i.imgur.com/DHOJTCz.jpeg"/>
-    </div>
-
-    <div class="info">
-      <div id="station-name" style="display:none;">OPEN RADIO</div>
-      <div id="track-title" style="display:none;"></div>
-      <div class="controls">
-        <div class="title">OPEN RADIO</div>
-        <div class="barra-decorativa"></div>
-        <div class="live-indicator">
-          <div class="dot"></div>
-          <span>EN VIVO</span>
-        </div>
-        <div class="song" id="song-title">Transmitiendo en vivo</div>
-        <div class="controls">
-          <button class="play-btn" onclick="togglePlay()">
-            <img alt="Play" id="play-icon" src="https://img.icons8.com/ios-filled/50/ffffff/play--v1.png"/>
-          </button>
-          <input class="volume" id="volume" max="1" min="0" step="0.01" type="range" value="1"/>
-        </div>
-
-        <div class="redes-visibles">
-          <a href="https://www.facebook.com/share/184kqoAPjP/" target="_blank" title="Facebook">
-            <img src="https://img.icons8.com/ios-filled/50/ffffff/facebook-new.png" alt="Facebook"/>
-          </a>
-          <a href="https://www.instagram.com/openradioquilmesgonza?utm_source=qr&stkn=MWMyb2g4YjE1MXp1OQ==" target="_blank" title="Instagram">
-            <img src="https://img.icons8.com/ios-filled/50/ffffff/instagram-new.png" alt="Instagram"/>
-          </a>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Audio con la URL directa y sin trucos raros de caché -->
-  <audio id="radio" src="https://uk24freenew.listen2myradio.com/live.mp3?typeportmount=s2_24429_stream_335822499" preload="auto" playsinline webkit-playsinline></audio>
+<!-- Audio sin preload agresivo para no saturar los slots de Listen2MyRadio -->
+  <audio id="radio" preload="none" playsinline webkit-playsinline></audio>
 
   <script>
     const streamUrl = "https://uk24freenew.listen2myradio.com/live.mp3?typeportmount=s2_24429_stream_335822499";
@@ -335,35 +44,49 @@
     function togglePlay() {
       if (isPlaying) {
         audio.pause();
+        audio.removeAttribute('src'); // Libera la ranura en el servidor de Listen2MyRadio
+        audio.load();
         isPlaying = false;
         playIcon.src = "https://img.icons8.com/ios-filled/50/ffffff/play--v1.png";
         songTitle.textContent = "Pausado";
         if ('mediaSession' in navigator) navigator.mediaSession.playbackState = "paused";
       } else {
-        // Respuesta visual instantánea
         songTitle.textContent = "Conectando...";
         playIcon.src = "https://img.icons8.com/ios-filled/50/ffffff/pause--v1.png";
         isPlaying = true;
 
-        // Aseguramos que la URL esté lista y reproducimos directo
-        if (!audio.src || audio.src === "") {
-          audio.src = streamUrl;
-        }
+        // Asignamos la URL directamente en el momento que la persona presiona play
+        audio.src = streamUrl;
+        audio.load();
 
-        audio.play()
-          .then(() => {
-            songTitle.textContent = "Transmitiendo en vivo";
-            configurarMediaSession();
-            if ('mediaSession' in navigator) navigator.mediaSession.playbackState = "playing";
-          })
-          .catch(err => {
-            console.error("Error al reproducir:", err);
-            isPlaying = false;
-            playIcon.src = "https://img.icons8.com/ios-filled/50/ffffff/play--v1.png";
-            songTitle.textContent = "Click para reproducir";
-          });
+        const playPromise = audio.play();
+
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => {
+              songTitle.textContent = "Transmitiendo en vivo";
+              configurarMediaSession();
+              if ('mediaSession' in navigator) navigator.mediaSession.playbackState = "playing";
+            })
+            .catch(err => {
+              console.warn("Error de conexión:", err);
+              isPlaying = false;
+              playIcon.src = "https://img.icons8.com/ios-filled/50/ffffff/play--v1.png";
+              songTitle.textContent = "Emisora fuera de línea";
+            });
+        }
       }
     }
+
+    // Captura si el servidor expulsa o no responde
+    audio.addEventListener('error', (e) => {
+      if (isPlaying) {
+        console.error("Fallo en el flujo:", e);
+        isPlaying = false;
+        playIcon.src = "https://img.icons8.com/ios-filled/50/ffffff/play--v1.png";
+        songTitle.textContent = "Señal no disponible";
+      }
+    });
 
     volumeSlider.addEventListener("input", () => {
       audio.volume = volumeSlider.value;
@@ -373,5 +96,3 @@
       setBlurBackground(bgImage);
     });
   </script>
-</body>
-</html>
