@@ -101,6 +101,11 @@
       justify-content: center;
       align-items: center;
       cursor: pointer;
+      transition: transform 0.1s ease;
+    }
+
+    .play-btn:active {
+      transform: scale(0.95);
     }
 
     .play-btn img {
@@ -114,7 +119,6 @@
       margin: 0 auto 15px;
     }
 
-    /* Barra de Redes Sociales Visibles */
     .redes-visibles {
       display: flex;
       justify-content: center;
@@ -252,7 +256,6 @@
   <div class="player-container">
     <div style="position: relative; width: 220px; height: 220px; margin: 30px auto 20px auto;">
       <img alt="Carátula" id="cover-art" class="logo" style="display:none; z-index:10; position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 50%; border: 4px solid white;" src="https://i.imgur.com/DHOJTCz.jpeg"/>
-      <!-- Disquito giratorio con el logo -->
       <img alt="OPEN RADIO Logo" class="logo spinning" id="logo" style="display:block; z-index:10; position: relative;" src="https://i.imgur.com/DHOJTCz.jpeg"/>
     </div>
 
@@ -274,7 +277,6 @@
           <input class="volume" id="volume" max="1" min="0" step="0.01" type="range" value="1"/>
         </div>
 
-        <!-- Botones visibles de Redes Sociales -->
         <div class="redes-visibles">
           <a href="https://www.facebook.com/share/184kqoAPjP/" target="_blank" title="Facebook">
             <img src="https://img.icons8.com/ios-filled/50/ffffff/facebook-new.png" alt="Facebook"/>
@@ -287,16 +289,18 @@
     </div>
   </div>
 
-  <!-- Audio Streaming Listen2MyRadio -->
-  <audio id="radio" src="https://uk24freenew.listen2myradio.com/live.mp3?typeportmount=s2_24429_stream_335822499" preload="none"></audio>
+  <!-- Audio con la URL directa y sin trucos raros de caché -->
+  <audio id="radio" src="https://uk24freenew.listen2myradio.com/live.mp3?typeportmount=s2_24429_stream_335822499" preload="auto" playsinline webkit-playsinline></audio>
 
   <script>
+    const streamUrl = "https://uk24freenew.listen2myradio.com/live.mp3?typeportmount=s2_24429_stream_335822499";
     const bgImage = "https://i.imgur.com/wQhe42X.png";
     const radioLogo = "https://i.imgur.com/DHOJTCz.jpeg";
+
     const audio = document.getElementById('radio');
     const playIcon = document.getElementById('play-icon');
     const volumeSlider = document.getElementById('volume');
-    const logo = document.getElementById('logo');
+    const songTitle = document.getElementById('song-title');
 
     let isPlaying = false;
 
@@ -304,39 +308,61 @@
       const isMobile = window.innerWidth < 768;
       const bg = document.getElementById("background-blur");
       if (bg && url) {
-        if (isMobile) {
-          bg.style.filter = "blur(30px)";
-          bg.style.opacity = "0.6";
-        } else {
-          bg.style.filter = "none";
-          bg.style.opacity = "1";
-        }
+        bg.style.filter = isMobile ? "blur(30px)" : "none";
+        bg.style.opacity = isMobile ? "0.6" : "1";
         bg.style.backgroundImage = `url(${url})`;
         document.body.style.backgroundColor = "black";
         bg.style.display = "block";
       }
     }
 
+    function configurarMediaSession() {
+      if ('mediaSession' in navigator) {
+        navigator.mediaSession.metadata = new MediaMetadata({
+          title: 'Transmitiendo en vivo',
+          artist: 'OPEN RADIO',
+          album: 'En Vivo',
+          artwork: [
+            { src: radioLogo, sizes: '512x512', type: 'image/jpeg' }
+          ]
+        });
+
+        navigator.mediaSession.setActionHandler('play', () => togglePlay());
+        navigator.mediaSession.setActionHandler('pause', () => togglePlay());
+      }
+    }
+
     function togglePlay() {
       if (isPlaying) {
         audio.pause();
+        isPlaying = false;
         playIcon.src = "https://img.icons8.com/ios-filled/50/ffffff/play--v1.png";
+        songTitle.textContent = "Pausado";
+        if ('mediaSession' in navigator) navigator.mediaSession.playbackState = "paused";
       } else {
-        audio.play().catch(e => console.log("Playback bloqueado:", e));
+        // Respuesta visual instantánea
+        songTitle.textContent = "Conectando...";
         playIcon.src = "https://img.icons8.com/ios-filled/50/ffffff/pause--v1.png";
+        isPlaying = true;
 
-        if ('mediaSession' in navigator) {
-          navigator.mediaSession.metadata = new MediaMetadata({
-            title: 'Transmitiendo en vivo',
-            artist: 'OPEN RADIO',
-            album: 'En Vivo',
-            artwork: [
-              { src: radioLogo, sizes: '500x500', type: 'image/jpeg' }
-            ]
-          });
+        // Aseguramos que la URL esté lista y reproducimos directo
+        if (!audio.src || audio.src === "") {
+          audio.src = streamUrl;
         }
+
+        audio.play()
+          .then(() => {
+            songTitle.textContent = "Transmitiendo en vivo";
+            configurarMediaSession();
+            if ('mediaSession' in navigator) navigator.mediaSession.playbackState = "playing";
+          })
+          .catch(err => {
+            console.error("Error al reproducir:", err);
+            isPlaying = false;
+            playIcon.src = "https://img.icons8.com/ios-filled/50/ffffff/play--v1.png";
+            songTitle.textContent = "Click para reproducir";
+          });
       }
-      isPlaying = !isPlaying;
     }
 
     volumeSlider.addEventListener("input", () => {
